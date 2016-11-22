@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+using ContosoBank.Models;
 
 namespace ContosoBank
 {
@@ -23,10 +24,15 @@ namespace ContosoBank
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
                 // calculate something for us to return
-                int length = (activity.Text ?? string.Empty).Length;
+                CurRateObjects.RootObject rootObject;
+                HttpClient client = new HttpClient();
+                string x = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=" + activity.Text));
+                rootObject = JsonConvert.DeserializeObject<CurRateObjects.RootObject>(x);
+                double currentRate = 1 / rootObject.rates.NZD;
+                string money = activity.Text;
 
                 // return our reply to the user
-                Activity reply = activity.CreateReply($"You sent {activity.Text} which was {length} characters");
+                Activity reply = activity.CreateReply($"Currently, 1 NZD ={currentRate} {money}");
                 await connector.Conversations.ReplyToActivityAsync(reply);
             }
             else
