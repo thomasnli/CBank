@@ -92,6 +92,45 @@ namespace ContosoBank
 
 
 
+                if (userMessage.ToLower().Equals("hello"))
+                {
+                    Activity replyToConversation = activity.CreateReply("Contoso Bank--Fluent in finance");
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "https://cdn5.f-cdn.com/contestentries/699966/15508968/57a8d7ac18e0b_thumb900.jpg"));
+                    List<CardAction> cardButtons = new List<CardAction>();
+
+
+
+                    CardAction plButton3 = new CardAction()
+                    {
+                        Value = "contoso",
+                        Type = "imBack",
+                        Title = "Make an appintment"
+                    };
+                    cardButtons.Add(plButton3);
+
+               
+
+                    HeroCard plCard = new HeroCard()
+                    {
+                        Title = "Address:",
+                        Text = "301-G050, Science building, University of Auckland",
+                        Images = cardImages,
+                        Buttons = cardButtons
+                    };
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+
+                    return Request.CreateResponse(HttpStatusCode.OK);
+
+                }
+
+
+
 
 
                 if (isCRRequest==2)
