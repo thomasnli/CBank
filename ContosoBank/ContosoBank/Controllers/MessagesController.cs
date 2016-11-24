@@ -8,6 +8,8 @@ using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using ContosoBank.Models;
+using System.Collections.Generic;
+using ContosoBank.DataModels;
 
 namespace ContosoBank
 {
@@ -23,18 +25,104 @@ namespace ContosoBank
             if (activity.Type == ActivityTypes.Message)
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
-                // calculate something for us to return
-                CurRateObjects.RootObject rootObject;
-                HttpClient client = new HttpClient();
-                string x = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=" + activity.Text));
-                rootObject = JsonConvert.DeserializeObject<CurRateObjects.RootObject>(x);
-                double currentRate = 1 / rootObject.rates.NZD;
-                string money = activity.Text;
 
-                // return our reply to the user
-                Activity reply = activity.CreateReply($"Currently, 1 NZD ={currentRate} {money}");
-                await connector.Conversations.ReplyToActivityAsync(reply);
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+                var userMessage = activity.Text;
+                string endOutput = "Hello";
+                int isCRRequest =1;
+           
+
+
+                if (userMessage.ToLower().Equals("get appointment"))
+                {
+                    List<TimeTable> timetables = await AzureManager.AzureManagerInstance.GetTimelines();
+                    endOutput = "Ticket number  Scheduled time"+"\n\n";
+                    foreach (TimeTable t in timetables)
+                    {
+                        endOutput +=   t.ticketnum +"------------------"+ t.meettime +"\n\n";
+                    }
+                    isCRRequest = 2;
+
+                }
+
+
+                if (userMessage.ToLower().Equals("contoso"))
+                {
+                    Activity replyToConversation = activity.CreateReply("Contoso Bank--Fluent in finance");
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "https://cdn5.f-cdn.com/contestentries/699966/15508968/57a8d7ac18e0b_thumb900.jpg"));
+                    List<CardAction> cardButtons = new List<CardAction>();
+
+
+
+                    CardAction plButton1 = new CardAction()
+                    {
+                        Value = "https://bancocontoso.azurewebsites.net/",
+                        Type = "openUrl",
+                        Title = "Login"
+                    };
+                    cardButtons.Add(plButton1);
+
+                    CardAction plButton2 = new CardAction()
+                    {
+                        Value = "0640211227149",
+                        Type = "call",
+                        Title = "Contact us"
+                    };
+                    cardButtons.Add(plButton2);
+
+                    HeroCard plCard = new HeroCard()
+                    {
+                        Title = "Address:",   
+                        Text= "301-G050, Science building, University of Auckland",                     
+                        Images = cardImages,                   
+                        Buttons = cardButtons
+                    };
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+
+                    return Request.CreateResponse(HttpStatusCode.OK);
+
+                }
+
+
+
+
+
+                if (isCRRequest==2)
+                {
+                    // return our reply to the user
+                    Activity infoReply = activity.CreateReply(endOutput);
+
+                    await connector.Conversations.ReplyToActivityAsync(infoReply);
+
+                }
+
+                else
+                {
+                    // calculate something for us to return
+                    CurRateObjects.RootObject rootObject;
+                    HttpClient client = new HttpClient();
+                    string x = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=" + activity.Text));
+                    rootObject = JsonConvert.DeserializeObject<CurRateObjects.RootObject>(x);
+                    double currentRate = 1 / rootObject.rates.NZD;
+                    string money = activity.Text;
+
+                    // return our reply to the user
+                    Activity reply = activity.CreateReply($"Currently, 1 NZD = {currentRate} {money}");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
             }
+
+     
+
+
+
             else
             {
                 HandleSystemMessage(activity);
@@ -42,6 +130,18 @@ namespace ContosoBank
             var response = Request.CreateResponse(HttpStatusCode.OK);
             return response;
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
         private Activity HandleSystemMessage(Activity message)
         {
