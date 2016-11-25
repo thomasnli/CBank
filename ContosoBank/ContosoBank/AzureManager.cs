@@ -44,10 +44,13 @@ namespace ContosoBank
             await this.timelineTable.InsertAsync(timetable);
         }
 
-        public async Task<List<TimeTable>> GetTimelines()
+        public async Task<List<TimeTable>> GetTimerecords()
         {
             return await this.timelineTable.ToListAsync();
         }
+
+
+
 
     }
 }

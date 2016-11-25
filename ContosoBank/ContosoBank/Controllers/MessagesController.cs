@@ -30,23 +30,28 @@ namespace ContosoBank
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
                 var userMessage = activity.Text;
                 string endOutput = "Hello";
-                int isCRRequest =1;
-           
+                int isCRRequest=1;
 
 
-                if (userMessage.ToLower().Equals("get appointment"))
+                // get appointment function, interact with database
+                if (userMessage.ToLower().Equals("get appointments"))
                 {
-                    List<TimeTable> timetables = await AzureManager.AzureManagerInstance.GetTimelines();
-                    endOutput = "Ticket number  Scheduled time"+"\n\n";
-                    foreach (TimeTable t in timetables)
+                    List<TimeTable> timerecord = await AzureManager.AzureManagerInstance.GetTimerecords();
+                    endOutput = "";
+                    foreach (TimeTable t in timerecord)
                     {
-                        endOutput +=   t.ticketnum +"------------------"+ t.meettime +"\n\n";
+                        endOutput += t.Ticketnum + "------------------" + t.Meettime + "\n\n";
                     }
+
                     isCRRequest = 2;
 
                 }
 
 
+
+
+
+                // create a card with login and call button
                 if (userMessage.ToLower().Equals("contoso"))
                 {
                     Activity replyToConversation = activity.CreateReply("Contoso Bank--Fluent in finance");
@@ -66,6 +71,14 @@ namespace ContosoBank
                         Title = "Login"
                     };
                     cardButtons.Add(plButton1);
+
+                    CardAction plButton6 = new CardAction()
+                    {
+                        Value = "Make an appointment",
+                        Type = "imBack",
+                        Title = "Make an appointment"
+                    };
+                    cardButtons.Add(plButton6);
 
                     CardAction plButton2 = new CardAction()
                     {
@@ -91,10 +104,10 @@ namespace ContosoBank
                 }
 
 
-
+                // if receive hello, a card is pop up, this card has a button to call the other card
                 if (userMessage.ToLower().Equals("hello"))
                 {
-                    Activity replyToConversation = activity.CreateReply("Contoso Bank--Fluent in finance");
+                    Activity replyToConversation = activity.CreateReply("Hello, now is "+ System.DateTime.Now);
                     replyToConversation.Recipient = activity.From;
                     replyToConversation.Type = "message";
                     replyToConversation.Attachments = new List<Attachment>();
@@ -102,22 +115,28 @@ namespace ContosoBank
                     cardImages.Add(new CardImage(url: "https://cdn5.f-cdn.com/contestentries/699966/15508968/57a8d7ac18e0b_thumb900.jpg"));
                     List<CardAction> cardButtons = new List<CardAction>();
 
-
-
                     CardAction plButton3 = new CardAction()
+                    {
+                        Value = "https://www.microsoft.com/en-nz/",
+                        Type = "openUrl",
+                        Title = "Go to website"
+                    };
+                    cardButtons.Add(plButton3);
+
+                    CardAction plButton4 = new CardAction()
                     {
                         Value = "contoso",
                         Type = "imBack",
-                        Title = "Make an appintment"
+                        Title = "More function"
                     };
-                    cardButtons.Add(plButton3);
+                    cardButtons.Add(plButton4);
 
                
 
                     HeroCard plCard = new HeroCard()
                     {
-                        Title = "Address:",
-                        Text = "301-G050, Science building, University of Auckland",
+                       
+                        Text = "Please reply the name of currency to check the currency rate, or you can click the button for services.",
                         Images = cardImages,
                         Buttons = cardButtons
                     };
@@ -132,7 +151,7 @@ namespace ContosoBank
 
 
 
-
+                // how to reply
                 if (isCRRequest==2)
                 {
                     // return our reply to the user
@@ -144,7 +163,7 @@ namespace ContosoBank
 
                 else
                 {
-                    // calculate something for us to return
+                    // calculate the currency rate to return
                     CurRateObjects.RootObject rootObject;
                     HttpClient client = new HttpClient();
                     string x = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=" + activity.Text));
@@ -172,15 +191,7 @@ namespace ContosoBank
 
 
 
-
-
-
-
-
-
-
-
-
+        
 
         private Activity HandleSystemMessage(Activity message)
         {

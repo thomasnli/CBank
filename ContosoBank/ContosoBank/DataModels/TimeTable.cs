@@ -10,26 +10,26 @@ namespace ContosoBank.DataModels
     public class TimeTable
     {
 
-        [JsonProperty(PropertyName = "Id")]
-        public string id { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "CreatedAt")]
-        public Double createdAt { get; set; }
+        [JsonProperty(PropertyName = "createdAt")]
+        public Double CreatedAt { get; set; }
 
-        [JsonProperty(PropertyName = "UpdatedAt")]
-        public string updatedAt { get; set; }
+        [JsonProperty(PropertyName = "updatedAt")]
+        public string UpdatedAt { get; set; }
 
-        [JsonProperty(PropertyName = "Version")]
-        public string version { get; set; }
+        [JsonProperty(PropertyName = "version")]
+        public string Version { get; set; }
 
-        [JsonProperty(PropertyName = "Ticketnum")]
-        public string ticketnum { get; set; }
+        [JsonProperty(PropertyName = "ticketnum")]
+        public string Ticketnum { get; set; }
 
-        [JsonProperty(PropertyName = "Meettime")]
-        public string meettime { get; set; }
+        [JsonProperty(PropertyName = "meettime")]
+        public string Meettime { get; set; }
 
-        [JsonProperty(PropertyName = "Deleted")]
-        public bool deleted { get; set; }
+        [JsonProperty(PropertyName = "deleted")]
+        public bool Deleted { get; set; }
         
 
     }
